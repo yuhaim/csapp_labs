@@ -139,7 +139,7 @@ NOTES:
  *   Rating: 1
  */
 int bitAnd(int x, int y) {
-  return 2;
+    return ~((~x)|(~y));
 }
 /* 
  * getByte - Extract byte n from word x
@@ -150,15 +150,11 @@ int bitAnd(int x, int y) {
  *   Rating: 2
  */
 int getByte(int x, int n) {
-
-
-
-
-
-
-
-  return 2;
-
+    int s = n << 3;
+    int y1 = x >> s;
+    int y2 = y1 >> 8;
+    y2 = y2 << 8;
+    return y1^y2;
 }
 /* 
  * logicalShift - shift x to the right by n, using a logical shift
@@ -169,7 +165,10 @@ int getByte(int x, int n) {
  *   Rating: 3 
  */
 int logicalShift(int x, int n) {
-  return 2;
+    int m = 1<<31;
+    m = m >> n;
+    m = m << 1;
+    return (x>>n) & (~m);
 }
 /*
  * bitCount - returns count of number of 1's in word
@@ -179,7 +178,40 @@ int logicalShift(int x, int n) {
  *   Rating: 4
  */
 int bitCount(int x) {
-  return 2;
+    int sum = 0;
+    sum += (x >> 0) & 1;
+    sum += (x >> 1) & 1;
+    sum += (x >> 2) & 1;
+    sum += (x >> 3) & 1;
+    sum += (x >> 4) & 1;
+    sum += (x >> 5) & 1;
+    sum += (x >> 6) & 1;
+    sum += (x >> 7) & 1;
+    sum += (x >> 8) & 1;
+    sum += (x >> 9) & 1;
+    sum += (x >> 10) & 1;
+    sum += (x >> 11) & 1;
+    sum += (x >> 12) & 1;
+    sum += (x >> 13) & 1;
+    sum += (x >> 14) & 1;
+    sum += (x >> 15) & 1;
+    sum += (x >> 16) & 1;
+    sum += (x >> 17) & 1;
+    sum += (x >> 18) & 1;
+    sum += (x >> 19) & 1;
+    sum += (x >> 20) & 1;
+    sum += (x >> 21) & 1;
+    sum += (x >> 22) & 1;
+    sum += (x >> 23) & 1;
+    sum += (x >> 24) & 1;
+    sum += (x >> 25) & 1;
+    sum += (x >> 26) & 1;
+    sum += (x >> 27) & 1;
+    sum += (x >> 28) & 1;
+    sum += (x >> 29) & 1;
+    sum += (x >> 30) & 1;
+    sum += (x >> 31) & 1;
+    return sum;
 }
 /* 
  * bang - Compute !x without using !
@@ -198,7 +230,7 @@ int bang(int x) {
  *   Rating: 1
  */
 int tmin(void) {
-  return 2;
+    return 0x01<<31;
 }
 /* 
  * fitsBits - return 1 if x can be represented as an 
@@ -210,7 +242,19 @@ int tmin(void) {
  *   Rating: 2
  */
 int fitsBits(int x, int n) {
-  return 2;
+    int neg1 = ~1+1;
+    int n1 = n + neg1;
+    int pow2n1 = 1<<n1;
+    int max = pow2n1 + neg1;
+    int neg_min = pow2n1;
+    
+    int diff_max = max + ~x + 1;
+    int diff_min = x + neg_min;
+    
+    int sign = diff_max | diff_min;
+    int to_last = (sign>>31)&1;
+    
+    return 1 + ~to_last + 1;
 }
 /* 
  * divpwr2 - Compute x/(2^n), for 0 <= n <= 30
@@ -221,7 +265,11 @@ int fitsBits(int x, int n) {
  *   Rating: 2
  */
 int divpwr2(int x, int n) {
-    return 2;
+    int floor = x >> n;
+    int ceiling = (x + (1<<n) + ~1 + 1)>>n;
+    int sign = floor>>31;
+    
+    return (sign&ceiling) + ((~sign)&floor);
 }
 /* 
  * negate - return -x 
@@ -231,7 +279,7 @@ int divpwr2(int x, int n) {
  *   Rating: 2
  */
 int negate(int x) {
-  return 2;
+    return ~x+1;
 }
 /* 
  * isPositive - return 1 if x > 0, return 0 otherwise 
@@ -241,7 +289,9 @@ int negate(int x) {
  *   Rating: 3
  */
 int isPositive(int x) {
-  return 2;
+    int sign = (x>>31) & 1;
+    int is_zero = !x;
+    return (is_zero&sign) + ((!is_zero)&(!sign));
 }
 /* 
  * isLessOrEqual - if x <= y  then return 1, else return 0 
@@ -251,7 +301,17 @@ int isPositive(int x) {
  *   Rating: 3
  */
 int isLessOrEqual(int x, int y) {
-  return 2;
+//     int diff = y + ~x + 1;
+//     int sign = diff>>31 & 1;
+//     int is_x_min = !(x ^ (1<<31));  // must be 1
+//     int sign_y = y>>31 & 1;
+//     int is_neg_overflow = sign_y&(!sign); // must be 0, except is_x_min
+//     int is_pos_overflow = sign&(!sign_y)); // must be 1, except is_x_min
+//     
+//     int adj_over = (!is_overflow)&(!sign);
+//     int adj_min = is_x_min + ((!is_x_min)&adj_over);
+    
+    return 2;
 }
 /*
  * ilog2 - return floor(log base 2 of x), where x > 0
@@ -275,7 +335,12 @@ int ilog2(int x) {
  *   Rating: 2
  */
 unsigned float_neg(unsigned uf) {
- return 2;
+    if(!(((0xFF800000 & uf) ^ 0xFF800000) && 
+        ((0x7F800000 & uf) ^ 0x7F800000)) && 
+        (0x007FFFFF & uf))
+        return uf;
+    
+    return uf ^ (0x01<<31);
 }
 /* 
  * float_i2f - Return bit-level equivalent of expression (float) x

